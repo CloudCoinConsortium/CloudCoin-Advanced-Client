@@ -748,8 +748,8 @@ public class DesktopGui extends JFrame {
         String helpMessage = "Customer Service:";
         String hoursMessage = "9:00am - 11:00pm PST";
         String phoneTrim = "15305002646";
-        String phone = "<html><a href=''>1 (530) 500-2646</a></html>";
-        String emailTrim = "CloudCoin.HelpDesk@Protonmail.com";
+        String phone = "<html><a href=''>1 (530) 762-1361</a></html>";
+        String emailTrim = "CloudCoinSupport@Protonmail.com";
         String email = "<html><a href=''>" + emailTrim + "</a></html>";
         String url = "http://cloudcoinconsortium.com/use.html";
 

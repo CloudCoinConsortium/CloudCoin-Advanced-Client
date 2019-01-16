@@ -26,6 +26,7 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.stream.Collectors;
 
 public class DesktopGui extends JFrame {
 
@@ -70,6 +71,9 @@ public class DesktopGui extends JFrame {
     /* Fields */
 
     public static boolean performingCriticalOperation = false;
+
+    // Servants
+    ArrayList<Process> servants = new ArrayList<>(16);
 
     // Save data
     private static String lastFolderImport = Paths.get("").toString();
@@ -127,7 +131,7 @@ public class DesktopGui extends JFrame {
     public DesktopGui() {
         // Main Window rules
         setLayout(new MigLayout());
-        setTitle("CloudCoin Master Program");
+        setTitle("CloudCoin Advanced Client");
         setSize(WINDOW_WIDTH, WINDOW_HEIGHT);
         getContentPane().setBackground(COLOR_PURPLE_HEADER);
 
@@ -155,10 +159,15 @@ public class DesktopGui extends JFrame {
     private void initializeData() {
         // Root Path
         String rootPath = Utils.loadData("RootPath");
-        if (rootPath.length() != 0)
+        if (rootPath == null || rootPath.length() != 0) {
+            System.out.println("custom root path");
             FileSystem.changeRootPath(rootPath);
-        else
+        }
+        else {
+            System.out.println("default root path");
+            FileSystem.setDefaultRootPath();
             FileSystem.createDirectories();
+        }
 
         // Save Data
         lastFolderImport = Utils.loadData("lastFolderImport");
@@ -166,6 +175,8 @@ public class DesktopGui extends JFrame {
             lastFolderImport = System.getProperty("user.home") + File.separatorChar + "Downloads" + File.separatorChar;
             Utils.saveData("lastFolderImport", lastFolderImport);
         }
+
+        Slaves.createCommandShowCoins(null);
     }
 
     private void initializeLayoutSquareHeader() {
@@ -226,7 +237,7 @@ public class DesktopGui extends JFrame {
         addGridButton(grid, "VAULT", e -> createPopupVault());
         addGridButton(grid, "REAUTHENTICATE", e -> Slaves.createCommandReauthenticator(null));
         addGridButton(grid, "ERASE", e -> Slaves.createCommandEraser(null));
-        addGridButton(grid, "CHANGE FOLDER", e -> Slaves.changeWorkspaceFolder());
+        addGridButton(grid, "CHANGE FOLDER", e -> Slaves.changeWorkspaceFolder(this));
         addGridButton(grid, "TRANSLATE", e -> Slaves.createCommandTranslate("english"));
     }
     private void addGridButton(JPanel grid, String buttonText, ActionListener actionListener) {
@@ -425,7 +436,7 @@ public class DesktopGui extends JFrame {
                     button.addActionListener(e -> Main.showFolder());
                 else if ("Change Workspace".equals(title))
                     button.addActionListener(e -> {
-                        Slaves.changeWorkspaceFolder();
+                        Slaves.changeWorkspaceFolder(this);
                     });
                 else if ("Backup".equals(title))
                     button.addActionListener(e -> {
@@ -465,31 +476,54 @@ public class DesktopGui extends JFrame {
 
     private void startAllServants() {
         try {
-            openJarProgram("authenticator_servant_v0.01");
-            openJarProgram("CloudCore-ShowCoins-Java-Sergiy-s-Branch");
-            openJarProgram("CloudCore-LossFixer-Java-Sergiy-s-Branch");
-            openJarProgram("com.cloudcore.EchoServant");
-            openJarProgram("eraser_servant_v0.01");
-            openJarProgram("exporter_servant_v0.01");
-            openJarProgram("grader_servant_v0.01");
-            openJarProgram("reauthenticator_servant_v0.01");
-            openJarProgram("unpacker_servant_v0.01");
-            openJarProgram("vaulter_servant_v0.01");
+            final Process process = openJarProgram("authenticator_servant_v0.03");
+            openJarProgram("backupper_servant_v0.03");
+            openJarProgram("echoer_servant_v0.02"); // Creates "Commands" Folder instead of "Commands"
+            openJarProgram("eraser_servant_v0.03");
+            openJarProgram("exporter_servant_v0.03");
+            openJarProgram("frackfixer_servant_v0.02");
+            openJarProgram("grader_servant_v0.02");
+            openJarProgram("lostfixer_servant_v0.03");
+            openJarProgram("reauthenticator_servant");
+            openJarProgram("showcoins_servant_v0.03");
+            openJarProgram("unpacker_servant_v0.02");
+            openJarProgram("vaulter_servant_v0.02");
+
+            Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+                System.out.println("Closing all Servants");
+                for (Process servant : servants)
+                    servant.destroy();
+                System.out.println("All Servants closed");
+            }));
+
+            new Thread(() -> {
+                BufferedReader input = new BufferedReader(new InputStreamReader(process.getInputStream()));
+                String line = null;
+                try {
+                    while ((line = input.readLine()) != null) {
+                        System.out.println(line);
+                    }
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }).start();
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
 
-    private void openJarProgram(String moduleName) throws Exception {
+    private Process openJarProgram(String moduleName) throws Exception {
         if (isProcessRunning(moduleName))
             killProcess(moduleName);
 
-        Process process = Runtime.getRuntime().exec("java -jar " + moduleName + ".jar");
-        OutputStream out = process.getOutputStream();
-        //process.pid();
+        Process process = Runtime.getRuntime().exec("java -jar " + moduleName + ".jar " + FileSystem.RootPath);
+        servants.add(process);
 
-        //String command = "Hello program, run this command: ExportCoins";
+        //OutputStream out = process.getOutputStream();
+        //String command = "Hello program, run this command: ExportCoins (Much faster than .txt files!)";
         //out.write(command.getBytes());
+
+        return process;
     }
 
     public static final String TASKLIST = "tasklist";
@@ -525,7 +559,7 @@ public class DesktopGui extends JFrame {
             return;
         }
 
-        FileSystem.moveFile(file.getName(), file.getAbsolutePath().replace(file.getName(), ""), FileSystem.SuspectFolder, true);
+        FileSystem.moveFile(file.getName(), file.getAbsolutePath().replace(file.getName(), ""), FileSystem.ImportFolder, true);
         repown();
     }
 
@@ -1147,9 +1181,6 @@ public class DesktopGui extends JFrame {
         updateTotalBank(totals);
     }
     private void updateTotalBank(int[] totals) {
-        // Header total
-        totalAmount.setText(Integer.toString(totals[0]));
-
         // List Serials table
         for (int i = 0, j = accountCoinsTable.getRowCount(); i < j; i++)
             accountCoinsTable.removeRow(0);
@@ -1157,15 +1188,20 @@ public class DesktopGui extends JFrame {
         ArrayList<CloudCoin> bankCoins = FileSystem.loadFolderCoins(FileSystem.BankFolder);
         bankCoins.addAll(FileSystem.loadFolderCoins(FileSystem.FrackedFolder));
 
+        int total = 0;
         for (CloudCoin coin : bankCoins) {
             // SN, NN, Denomination, ED
             accountCoinsTable.addRow(new Object[] {String.valueOf(coin.getSn()),
                     String.valueOf(CoinUtils.getDenomination(coin)),
                     coin.getEd()});
+            total += CoinUtils.getDenomination(coin);
         }
+
+        // Header total
+        totalAmount.setText(Integer.toString(total));
     }
 
-    private static JFrame createPopup(JFrame topWindow, String message) {
+    public static JFrame createPopup(JFrame topWindow, String message) {
         final JFrame parent = new JFrame();
         parent.setBackground(COLOR_OFFWHITE);
         parent.setResizable(false);

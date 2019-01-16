@@ -25,8 +25,8 @@ public class FileSystem {
     /* Fields */
 
     //public static String RootPath = Paths.get("").toAbsolutePath().toString() + File.separator;
-    public static String RootPath = "C:\\CloudCoinServer\\accounts\\DefaultUser\\";
-    public static String RootPathNoAccount = "C:\\CloudCoinServer\\";
+    public static String RootPath = "C:\\Users\\Public\\Documents\\CloudCoin\\Accounts\\DefaultUser\\";
+    public static String RootPathNoAccount = "C:\\Users\\Public\\Documents\\CloudCoin\\";
     // TODO: Don't upload these lines!
 
     private static final DateTimeFormatter timestampFormat = DateTimeFormatter.ofPattern("yyyyMMddHHmmssSSS");
@@ -44,7 +44,7 @@ public class FileSystem {
     public static String CounterfeitFolder = RootPath + Config.TAG_COUNTERFEIT + File.separator;
     public static String LostFolder = RootPath + Config.TAG_LOST + File.separator;
 
-    public static String CommandsFolder = RootPath + Config.TAG_COMMANDS + File.separator;
+    public static String CommandFolder = RootPath + Config.TAG_COMMAND + File.separator;
     public static String LogsFolder = RootPath + Config.TAG_LOGS + File.separator;
     public static String TemplateFolder = RootPath + Config.TAG_TEMPLATES + File.separator;
 
@@ -67,7 +67,7 @@ public class FileSystem {
             Files.createDirectories(Paths.get(CounterfeitFolder));
             Files.createDirectories(Paths.get(LostFolder));
 
-            Files.createDirectories(Paths.get(CommandsFolder));
+            Files.createDirectories(Paths.get(CommandFolder));
             Files.createDirectories(Paths.get(LogsFolder));
             Files.createDirectories(Paths.get(TemplateFolder));
 
@@ -97,11 +97,22 @@ public class FileSystem {
         FrackedFolder = RootPath + Config.TAG_FRACKED + File.separator;
         CounterfeitFolder = RootPath + Config.TAG_COUNTERFEIT + File.separator;
         LostFolder = RootPath + Config.TAG_LOST + File.separator;
-        CommandsFolder = RootPath + Config.TAG_COMMANDS + File.separator;
+        CommandFolder = RootPath + Config.TAG_COMMAND + File.separator;
         LogsFolder = RootPath + Config.TAG_LOGS + File.separator;
         TemplateFolder = RootPath + Config.TAG_TEMPLATES + File.separator;
 
+        SystemLogsFolder = RootPathNoAccount + Config.TAG_LOGS + File.separator;
+
         createDirectories();
+    }
+
+    public static void setDefaultRootPath() {
+        String username = System.getProperty("user.name");
+        RootPathNoAccount = "C:\\Users\\" + username + "\\Documents\\CloudCoin\\";
+        RootPath = RootPathNoAccount + "Accounts\\DefaultUser\\";
+        changeRootPath(RootPath);
+        Utils.saveData("RootPath", RootPath);
+        System.out.println(RootPath);
     }
 
     /**
@@ -192,9 +203,9 @@ public class FileSystem {
     public static void saveCommand(Command command) throws IOException {
         String commandName = (command.commandName != null) ? command.commandName : command.command;
         String filename = Utils.ensureFilenameUnique(commandName + LocalDateTime.now().format(timestampFormat),
-                "", CommandsFolder);
-        Files.createDirectories(Paths.get(CommandsFolder));
-        Files.write(Paths.get(CommandsFolder + filename), Utils.createGson().toJson(command).getBytes());
+                "", CommandFolder);
+        Files.createDirectories(Paths.get(CommandFolder));
+        Files.write(Paths.get(CommandFolder + filename), Utils.createGson().toJson(command).getBytes());
     }
 
     /**

@@ -16,7 +16,7 @@ public class StatusParser {
     public static int[] getTotalBank() {
         int[] totals = new int[6];
         Path path = Paths.get(FileSystem.SystemLogsFolder + "ShowCoins" + File.separator);
-        System.out.println(path.toString());
+        System.out.println("Parsing bankCoins at: " + path.toString());
         try {
             Files.createDirectories(path);
         } catch (IOException e) {

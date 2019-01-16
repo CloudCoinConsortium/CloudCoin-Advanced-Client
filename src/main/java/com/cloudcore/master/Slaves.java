@@ -1,9 +1,11 @@
 package com.cloudcore.master;
 
 import com.cloudcore.master.core.FileSystem;
+import com.cloudcore.master.gui.DesktopGui;
 import com.cloudcore.master.server.Command;
 import com.cloudcore.master.utils.Utils;
 
+import javax.swing.*;
 import java.io.File;
 import java.io.IOException;
 
@@ -98,10 +100,15 @@ public class Slaves {
         }
     }
 
-    public static void changeWorkspaceFolder() {
+    public static void changeWorkspaceFolder(JFrame topWindow) {
         File folder = FileSystem.folderChooser();
         if (folder == null || !folder.exists() || !folder.isDirectory())
             return;
+        if (folder.getAbsolutePath().contains(" ")) {
+            DesktopGui.createPopup(topWindow, "Cannot choose a directory containing a space.");
+            return;
+        }
+
         Utils.saveData("RootPath", folder.getAbsolutePath());
         FileSystem.changeRootPath(folder.getAbsolutePath());
     }

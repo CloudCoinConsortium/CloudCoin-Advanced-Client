@@ -14,10 +14,6 @@ public class Main {
         new DesktopGui();
     }
 
-    private static void setup() {
-        FileSystem.createDirectories();
-    }
-
     public static void showFolder() {
         showFolder(null);
     }

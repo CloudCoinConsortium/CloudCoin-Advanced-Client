@@ -476,18 +476,18 @@ public class DesktopGui extends JFrame {
 
     private void startAllServants() {
         try {
-            final Process process = openJarProgram("authenticator_servant_v0.03");
-            openJarProgram("backupper_servant_v0.03");
+            final Process process = openJarProgram("authenticator_servant");
             openJarProgram("echoer_servant_v0.02"); // Creates "Commands" Folder instead of "Commands"
-            openJarProgram("eraser_servant_v0.03");
-            openJarProgram("exporter_servant_v0.03");
             openJarProgram("frackfixer_servant_v0.02");
-            openJarProgram("grader_servant_v0.02");
-            openJarProgram("lostfixer_servant_v0.03");
+            openJarProgram("backupper_servant");
+            openJarProgram("eraser_servant");
+            openJarProgram("exporter_servant");
+            openJarProgram("grader_servant");
+            openJarProgram("lostfixer_servant");
             openJarProgram("reauthenticator_servant");
-            openJarProgram("showcoins_servant_v0.03");
-            openJarProgram("unpacker_servant_v0.02");
-            openJarProgram("vaulter_servant_v0.02");
+            openJarProgram("showcoins_servant");
+            openJarProgram("unpacker_servant");
+            openJarProgram("vaulter_servant");
 
             Runtime.getRuntime().addShutdownHook(new Thread(() -> {
                 System.out.println("Closing all Servants");
@@ -553,13 +553,14 @@ public class DesktopGui extends JFrame {
     }
 
     private void createPopupPown() {
-        final File file = FileSystem.fileChooser();
-        if (file == null) {
+        final File[] files = FileSystem.fileChooser(FileSystem.ImportFolder);
+        if (files == null || files.length == 0) {
             cardLayout.show(card, "Home");
             return;
         }
 
-        FileSystem.moveFile(file.getName(), file.getAbsolutePath().replace(file.getName(), ""), FileSystem.ImportFolder, true);
+        for (File file : files)
+            FileSystem.moveFile(file.getName(), file.getAbsolutePath().replace(file.getName(), ""), FileSystem.ImportFolder, true);
         repown();
     }
 

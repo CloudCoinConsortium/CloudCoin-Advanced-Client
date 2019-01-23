@@ -169,14 +169,19 @@ public class FileSystem {
         return file.get();
     }
 
-    public static File fileChooser() {
+    public static File[] fileChooser() {
+        return fileChooser(null);
+    }
+    public static File[] fileChooser(String filepath) {
         FileDialog dialog = new java.awt.FileDialog((java.awt.Frame) null);
+        dialog.setDirectory(filepath);
         dialog.setVisible(true);
-        String result = dialog.getFile();
+        dialog.setMultipleMode(true);
+        File[] result = dialog.getFiles();
         if (result == null)
             return null;
         else
-            return new File(dialog.getDirectory() + File.separator + dialog.getFile());
+            return result;
     }
 
     public static void moveFile(String fileName, String sourceFolder, String targetFolder, boolean replaceCoins) {

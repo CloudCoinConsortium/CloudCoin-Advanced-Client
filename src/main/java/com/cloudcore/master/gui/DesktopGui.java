@@ -477,8 +477,8 @@ public class DesktopGui extends JFrame {
     private void startAllServants() {
         try {
             final Process process = openJarProgram("authenticator_servant");
-            openJarProgram("echoer_servant_v0.02"); // Creates "Commands" Folder instead of "Commands"
-            openJarProgram("frackfixer_servant_v0.02");
+            openJarProgram("echoer_servant"); // Creates "Commands" Folder instead of "Commands"
+            openJarProgram("frackfixer_servant");
             openJarProgram("backupper_servant");
             openJarProgram("eraser_servant");
             openJarProgram("exporter_servant");
